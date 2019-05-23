@@ -52,11 +52,31 @@ def load(filepath):
 
         return tracks
 
+def extract_features(data):
+    features = load(METADATA_DIR + "features.csv")
+
+    keywords = [("spectral_centroid", "mean"), ("spectral_centroid", "std"), ("chroma_stft", "mean"), ("chroma_stft", "std")]
+    feature_table = {}
+    for composer in data:
+        feature_table[composer] = []
+        tracks = data[composer]
+        for track in tracks:
+            track_dict = {}
+            tid = track.name
+            track_dict["title"] = track["track", "title"]
+            for keyword in keywords:
+                try:
+                    track_dict[keyword] = features[keyword].loc[[tid]]["01"].item()
+                except KeyError:
+                    track_dict[feature] = None
+                    continue
+            feature_table[composer] += [track_dict]
+    return feature_table
+
 def load_data(composers_to_learn=None):
     tracks = load(METADATA_DIR + "tracks.csv")
     #genres = load(METADATA_DIR + "genres.csv")
     #features = load(METADATA_DIR + "features.csv")
-    #echonest = load(METADATA_DIR + "echonest.csv")
 
     tracks = tracks[tracks["track", "genre_top"] == "Classical"]
     tracks = tracks[tracks["track", "composer"].notnull()]
@@ -83,7 +103,9 @@ def count_data(composer_dict):
     return count_dict
 
 if __name__=="__main__":
-    composers_to_learn = ["Bach", "Haydn"]
-    composer_data = load_data()
+    composers_to_learn = ["Bach", "Haydn", "Alkan", "Orff"]
+    composer_data = load_data(composers_to_learn)
     count_dict = count_data(composer_data)
     print(count_dict)
+    features = extract_features(composer_data)
+    print(features)
